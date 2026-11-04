@@ -4,13 +4,13 @@ import json
 
 from fastapi import FastAPI, Header, HTTPException, Request
 
-app = FastAPI()
+from app.config import WEBHOOK_SECRET
 
-WEBHOOK_SECRET = "dev-secret-change-later"
+app = FastAPI()
 
 
 def verify_signature(body: bytes, signature_header: str | None) -> bool:
-    if not signature_header:
+    if not WEBHOOK_SECRET or not signature_header:
         return False
     expected = "sha256=" + hmac.new(
         WEBHOOK_SECRET.encode(), body, hashlib.sha256
