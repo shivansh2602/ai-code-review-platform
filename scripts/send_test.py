@@ -6,7 +6,11 @@ import urllib.error
 import urllib.request
 
 secret = sys.argv[1] if len(sys.argv) > 1 else "dev-secret-change-later"
-body = json.dumps({"hello": "world"}).encode()
+event = sys.argv[2] if len(sys.argv) > 2 else "pull_request"
+
+body = json.dumps(
+    {"action": "opened", "number": 1, "repository": {"full_name": "me/demo"}}
+).encode()
 signature = "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
 
 req = urllib.request.Request(
@@ -15,6 +19,7 @@ req = urllib.request.Request(
     headers={
         "Content-Type": "application/json",
         "X-Hub-Signature-256": signature,
+        "X-GitHub-Event": event,
     },
 )
 try:

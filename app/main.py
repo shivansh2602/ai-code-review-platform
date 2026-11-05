@@ -9,6 +9,9 @@ from sqlalchemy.orm import Session
 from app import models
 from app.config import WEBHOOK_SECRET
 from app.database import Base, engine, get_db
+from app.task_queue import enqueue_event
+
+REVIEW_ACTIONS = {"opened", "synchronize", "reopened"}
 
 
 @asynccontextmanager
@@ -52,6 +55,10 @@ async def webhook(
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Body is not valid JSON")
 
+    should_review = (
+        x_github_event == "pull_request" and data.get("action") in REVIEW_ACTIONS
+    )
+
     event = models.WebhookEvent(
         delivery_id=x_github_delivery,
         event_type=x_github_event,
@@ -59,9 +66,13 @@ async def webhook(
         repo=(data.get("repository") or {}).get("full_name"),
         pr_number=data.get("number"),
         payload=data,
+        status="queued" if should_review else "ignored",
     )
     db.add(event)
     db.commit()
     db.refresh(event)
+
+    if should_review:
+        enqueue_event(event.id)
 
     return {"message": "received", "event_id": event.id}

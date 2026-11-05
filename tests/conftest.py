@@ -23,7 +23,15 @@ def db_session():
 
 
 @pytest.fixture
-def client(db_session, monkeypatch):
+def enqueued(monkeypatch):
+    """Replaces the real Redis queue with a simple list we can inspect."""
+    calls = []
+    monkeypatch.setattr(main, "enqueue_event", calls.append)
+    return calls
+
+
+@pytest.fixture
+def client(db_session, enqueued, monkeypatch):
     monkeypatch.setattr(main, "WEBHOOK_SECRET", "test-secret")
 
     def override_get_db():

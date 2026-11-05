@@ -10,3 +10,4 @@ DATABASE_URL = os.getenv(
     "DATABASE_URL",
     "postgresql+psycopg://reviewer:devpassword@localhost:5432/reviews",
 )
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")

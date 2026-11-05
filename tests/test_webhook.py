@@ -2,7 +2,7 @@ import hashlib
 import hmac
 import json
 
-from app import models
+from app import models, worker
 
 SECRET = "test-secret"
 BODY = json.dumps(
@@ -57,3 +57,37 @@ def test_invalid_json_rejected(client):
     headers = {"X-Hub-Signature-256": sign(bad_body, SECRET)}
     response = client.post("/webhook", content=bad_body, headers=headers)
     assert response.status_code == 400
+
+def test_pull_request_opened_is_enqueued(client, db_session, enqueued):
+    headers = {
+        "X-Hub-Signature-256": sign(BODY, SECRET),
+        "X-GitHub-Event": "pull_request",
+    }
+    response = client.post("/webhook", content=BODY, headers=headers)
+
+    event_id = response.json()["event_id"]
+    assert enqueued == [event_id]
+    assert db_session.get(models.WebhookEvent, event_id).status == "queued"
+
+
+def test_other_events_are_ignored(client, enqueued):
+    headers = {
+        "X-Hub-Signature-256": sign(BODY, SECRET),
+        "X-GitHub-Event": "ping",
+    }
+    client.post("/webhook", content=BODY, headers=headers)
+    assert enqueued == []
+
+
+def test_worker_creates_review(db_session):
+    event = models.WebhookEvent(
+        event_type="pull_request", payload={}, status="queued"
+    )
+    db_session.add(event)
+    db_session.commit()
+
+    worker.process_event(event.id, db=db_session)
+
+    db_session.refresh(event)
+    assert event.status == "done"
+    assert db_session.query(models.Review).count() == 1    
