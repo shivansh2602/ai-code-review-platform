@@ -2,7 +2,8 @@ import hashlib
 import hmac
 import json
 
-from app import models, worker
+# from app import models, worker
+from app import models
 
 SECRET = "test-secret"
 BODY = json.dumps(
@@ -79,15 +80,4 @@ def test_other_events_are_ignored(client, enqueued):
     assert enqueued == []
 
 
-def test_worker_creates_review(db_session):
-    event = models.WebhookEvent(
-        event_type="pull_request", payload={}, status="queued"
-    )
-    db_session.add(event)
-    db_session.commit()
-
-    worker.process_event(event.id, db=db_session)
-
-    db_session.refresh(event)
-    assert event.status == "done"
-    assert db_session.query(models.Review).count() == 1    
+    

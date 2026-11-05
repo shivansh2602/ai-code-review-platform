@@ -11,3 +11,4 @@ DATABASE_URL = os.getenv(
     "postgresql+psycopg://reviewer:devpassword@localhost:5432/reviews",
 )
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")

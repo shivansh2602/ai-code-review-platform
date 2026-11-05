@@ -1,17 +1,21 @@
+import argparse
 import hashlib
 import hmac
 import json
-import sys
 import urllib.error
 import urllib.request
 
-secret = sys.argv[1] if len(sys.argv) > 1 else "dev-secret-change-later"
-event = sys.argv[2] if len(sys.argv) > 2 else "pull_request"
+parser = argparse.ArgumentParser()
+parser.add_argument("--secret", default="dev-secret-change-later")
+parser.add_argument("--event", default="pull_request")
+parser.add_argument("--repo", default="me/demo")
+parser.add_argument("--pr", type=int, default=1)
+args = parser.parse_args()
 
 body = json.dumps(
-    {"action": "opened", "number": 1, "repository": {"full_name": "me/demo"}}
+    {"action": "opened", "number": args.pr, "repository": {"full_name": args.repo}}
 ).encode()
-signature = "sha256=" + hmac.new(secret.encode(), body, hashlib.sha256).hexdigest()
+signature = "sha256=" + hmac.new(args.secret.encode(), body, hashlib.sha256).hexdigest()
 
 req = urllib.request.Request(
     "http://127.0.0.1:8000/webhook",
@@ -19,7 +23,7 @@ req = urllib.request.Request(
     headers={
         "Content-Type": "application/json",
         "X-Hub-Signature-256": signature,
-        "X-GitHub-Event": event,
+        "X-GitHub-Event": args.event,
     },
 )
 try:
