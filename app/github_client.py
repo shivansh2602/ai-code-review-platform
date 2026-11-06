@@ -58,3 +58,15 @@ def get_pr_python_files(repo: str, pr_number: int) -> dict[str, str]:
         if len(content.encode()) <= MAX_FILE_BYTES:
             files[name] = content
     return files
+
+
+def post_pr_comment(repo: str, pr_number: int, body: str) -> dict:
+    # GitHub treats PR conversation comments as "issue comments".
+    response = httpx.post(
+        f"{API}/repos/{repo}/issues/{pr_number}/comments",
+        json={"body": body},
+        headers=_headers(),
+        timeout=30,
+    )
+    response.raise_for_status()
+    return response.json()
