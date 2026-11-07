@@ -71,3 +71,16 @@ def test_review_is_kept_when_posting_fails(db_session, monkeypatch):
     review = db_session.query(models.Review).one()
     assert event.status == "failed"
     assert review.status == "analyzed"
+
+def test_worker_includes_llm_summary(db_session, monkeypatch, posted):
+    monkeypatch.setattr(
+        worker, "get_pr_python_files", lambda repo, pr: {"bad.py": "import os\n"}
+    )
+    monkeypatch.setattr(worker, "summarize", lambda files, findings: "Looks risky overall.")
+    event = make_event(db_session)
+
+    worker.process_event(event.id, db=db_session)
+
+    review = db_session.query(models.Review).one()
+    assert review.llm_summary == "Looks risky overall."
+    assert "Looks risky overall." in posted[0][2]

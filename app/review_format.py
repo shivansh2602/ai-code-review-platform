@@ -11,7 +11,7 @@ def format_comment(files: list[str], findings: list[dict], summary: str | None =
     lines = [MARKER, "## Automated code review", ""]
 
     if summary:
-        lines += [summary, ""]
+        lines += ["### AI summary", "", summary, ""]
 
     if not files:
         lines.append("No Python files were changed in this PR, so there was nothing to analyze.")

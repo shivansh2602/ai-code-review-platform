@@ -5,6 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 from app import main, models  # noqa: F401
+from app.analyzers import llm
 from app.database import Base, get_db
 
 
@@ -40,3 +41,8 @@ def client(db_session, enqueued, monkeypatch):
     main.app.dependency_overrides[get_db] = override_get_db
     yield TestClient(main.app)
     main.app.dependency_overrides.clear()
+
+@pytest.fixture(autouse=True)
+def no_real_llm(monkeypatch):
+    """Tests never call the real Gemini API, whatever is in .env."""
+    monkeypatch.setattr(llm, "GEMINI_API_KEY", "")

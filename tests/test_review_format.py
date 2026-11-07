@@ -29,3 +29,7 @@ def test_long_lists_are_truncated():
 def test_pipes_in_messages_do_not_break_the_table():
     body = format_comment(["a.py"], [dict(FINDING, message="a | b")])
     assert "a \\| b" in body
+
+def test_summary_is_included():
+    body = format_comment(["a.py"], [FINDING], summary="Short summary")
+    assert "Short summary" in body    
