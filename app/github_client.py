@@ -70,3 +70,23 @@ def post_pr_comment(repo: str, pr_number: int, body: str) -> dict:
     )
     response.raise_for_status()
     return response.json()
+
+def update_pr_comment(repo: str, comment_id: int, body: str) -> dict:
+    response = httpx.patch(
+        f"{API}/repos/{repo}/issues/comments/{comment_id}",
+        json={"body": body},
+        headers=_headers(),
+        timeout=30,
+    )
+    response.raise_for_status()
+    return response.json()
+
+def update_pr_comment(repo: str, comment_id: int, body: str) -> dict:
+    response = httpx.patch(
+        f"{API}/repos/{repo}/issues/comments/{comment_id}",
+        json={"body": body},
+        headers=_headers(),
+        timeout=30,
+    )
+    response.raise_for_status()
+    return response.json()    

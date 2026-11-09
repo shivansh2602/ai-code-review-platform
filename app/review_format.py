@@ -35,6 +35,20 @@ def format_comment(files: list[str], findings: list[dict], summary: str | None =
         f"**{len(findings)} finding(s):** {counts['high']} high, "
         f"{counts['medium']} medium, {counts['low']} low"
     )
+
+    unparsed = sorted(
+        {f["file"] for f in findings if f["code"] in ("invalid-syntax", "syntax-error")}
+    )
+    if unparsed:
+        names = ", ".join(f"`{name}`" for name in unparsed)
+        lines += [
+            "",
+            f"**Warning:** could not parse {names} (syntax error). "
+            "Security analysis was skipped for these files.",
+        ]
+
+
+
     lines += ["", "| Severity | Location | Rule | Issue |", "|---|---|---|---|"]
 
     for f in ordered[:MAX_ROWS]:

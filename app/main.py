@@ -76,3 +76,26 @@ async def webhook(
         enqueue_event(event.id)
 
     return {"message": "received", "event_id": event.id}
+
+@app.get("/reviews")
+def list_reviews(limit: int = 20, db: Session = Depends(get_db)):
+    limit = max(1, min(limit, 100))
+    rows = (
+        db.query(models.Review, models.WebhookEvent)
+        .join(models.WebhookEvent, models.Review.event_id == models.WebhookEvent.id)
+        .order_by(models.Review.id.desc())
+        .limit(limit)
+        .all()
+    )
+    return [
+        {
+            "id": review.id,
+            "repo": event.repo,
+            "pr_number": event.pr_number,
+            "status": review.status,
+            "findings": len((review.static_findings or {}).get("findings", [])),
+            "timings": (review.static_findings or {}).get("timings"),
+            "created_at": review.created_at,
+        }
+        for review, event in rows
+    ]
