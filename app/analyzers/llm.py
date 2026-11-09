@@ -1,11 +1,11 @@
+import logging
 import time
 
 import httpx
-import logging
-
-log = logging.getLogger(__name__)
 
 from app.config import GEMINI_API_KEY, GEMINI_MODEL
+
+log = logging.getLogger(__name__)
 
 ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
 MAX_CODE_CHARS = 12_000

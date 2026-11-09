@@ -53,7 +53,7 @@ async def webhook(
     try:
         data = json.loads(body)
     except json.JSONDecodeError:
-        raise HTTPException(status_code=400, detail="Body is not valid JSON")
+        raise HTTPException(status_code=400, detail="Body is not valid JSON") from None
 
     should_review = (
         x_github_event == "pull_request" and data.get("action") in REVIEW_ACTIONS

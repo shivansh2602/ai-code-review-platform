@@ -1,0 +1,9 @@
+target-version = "py313"
+
+[lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[lint.flake8-bugbear]
+# FastAPI's Depends() and Header() in function arguments are the normal pattern.
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Header"]
