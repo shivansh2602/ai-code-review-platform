@@ -80,4 +80,3 @@ def test_other_events_are_ignored(client, enqueued):
     assert enqueued == []
 
 
-    

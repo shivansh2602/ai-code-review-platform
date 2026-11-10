@@ -1,3 +1,5 @@
+from urllib.parse import quote
+
 import httpx
 
 from app.config import GITHUB_TOKEN
@@ -35,7 +37,7 @@ def get_changed_files(repo: str, pr_number: int) -> list[dict]:
 
 def get_file_content(repo: str, path: str, ref: str) -> str:
     response = httpx.get(
-        f"{API}/repos/{repo}/contents/{path}",
+        f"{API}/repos/{repo}/contents/{quote(path, safe='/')}",
         params={"ref": ref},
         headers=_headers("application/vnd.github.raw+json"),
         timeout=30,
@@ -81,4 +83,4 @@ def update_pr_comment(repo: str, comment_id: int, body: str) -> dict:
         timeout=30,
     )
     response.raise_for_status()
-    return response.json()    
+    return response.json()

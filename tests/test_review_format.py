@@ -32,11 +32,11 @@ def test_pipes_in_messages_do_not_break_the_table():
 
 def test_summary_is_included():
     body = format_comment(["a.py"], [FINDING], summary="Short summary")
-    assert "Short summary" in body    
+    assert "Short summary" in body
 
 def test_syntax_errors_are_called_out():
     broken = dict(
         FINDING, tool="ruff", code="invalid-syntax", severity="low",
         message="Unexpected indentation",
     )
-    assert "could not parse" in format_comment(["a.py"], [broken])    
+    assert "could not parse" in format_comment(["a.py"], [broken])

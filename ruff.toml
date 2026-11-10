@@ -1,7 +1,7 @@
 target-version = "py313"
 
 [lint]
-select = ["E", "F", "I", "B", "UP"]
+select = ["E", "F", "W", "I", "B", "UP"]
 ignore = ["E501"]
 
 [lint.flake8-bugbear]

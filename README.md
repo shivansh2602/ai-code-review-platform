@@ -58,10 +58,13 @@ Python 3.13, FastAPI, PostgreSQL, SQLAlchemy, Redis, RQ, Docker Compose, pytest,
 ## Limitations
 
 - Most of the latency is the LLM call. A planned improvement is to post the static-analysis table first and edit in the summary when it arrives.
-- Python files only, at most 50 files and 200 KB per file per PR.
+- Python files only. Only the first 100 changed files of a PR are examined, at most 50 `.py` files are analyzed, and files over 200 KB are skipped.
 - No automatic retry when a GitHub call fails; the event is marked `failed`.
+- Redelivered webhooks are not de-duplicated. The result is a repeated analysis, and the existing comment is updated.
 - Tables are created at startup with `create_all`; there are no migrations yet.
 - `/reviews` has no authentication. Do not expose it publicly as it is.
+- Comments are posted with a personal access token, so they appear under that user's name. A GitHub App would give the bot its own identity.
+- The containers run as root; a production setup should use a non-root user.
 - The free Gemini tier may use submitted content to improve Google products, so do not review private code with it.
 - Runs locally; a public URL (for example a tunnel) is needed to receive real GitHub webhooks.
 
@@ -74,7 +77,16 @@ cp .env.example .env        # then fill in the values
 docker compose up --build -d
 ```
 
-Required `.env` values: `WEBHOOK_SECRET`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `GITHUB_TOKEN`, and optionally `GEMINI_API_KEY` and `GEMINI_MODEL`.
+Required `.env` values: 
+Generate a random webhook secret (and use the same value in the GitHub webhook settings):
+
+```bash
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+`docker-compose.override.yml` mounts `./app` into the containers for development. Delete it to run from the built image.
+
+`WEBHOOK_SECRET`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `GITHUB_TOKEN`, and optionally `GEMINI_API_KEY` and `GEMINI_MODEL`.
 
 Send a signed test event for a real PR:
 
